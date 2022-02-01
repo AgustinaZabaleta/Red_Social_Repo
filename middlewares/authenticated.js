@@ -2,9 +2,10 @@ const { verifyToken } = require('../utils/jwt');
 
 async function validateRequest(req, res, next) {
   try {
+    // 1 Checkeamos el token recibido en la cabecera de la solicitud
     const auth = req.headers['authorization'];
     const token = auth?.replace('Bearer ', '');
-    // comprobamos que hay un token antes de verificar
+    // 2 Comprobamos que existe antes de verificar
     if (!token)
       return res.status(403).send({
         data: [],
@@ -12,9 +13,13 @@ async function validateRequest(req, res, next) {
         error: 'InvalidToken!',
         message: 'imposible procesar la solicitud',
       });
-    // verificamos (si devuelve true continuamos)
-    const store = await verifyToken(token);
-    if (store) next();
+    // 2 Verificamos si aun es valido
+    const tokenValid = await verifyToken(token);
+
+    if (tokenValid) {
+      req.user = tokenValid;
+      next();
+    }
   } catch (error) {
     return res.status(401).send({
       data: [],
