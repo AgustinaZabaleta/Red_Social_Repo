@@ -1,21 +1,24 @@
 const express = require('express');
-const { errorHandler } = require('./utils/errorHandler');
+const routes = require('./routes');
+const { errorLogger, errorHandler } = require('./middlewares/errorHandler');
+
 const app = express();
 
 // para parsear data en json
 app.use(express.json());
 
 // rutas
-const userRoutes = require('./routes/user');
+app.use('/api', routes);
 
-// base rutas
-app.use('/api', userRoutes);
 // resolucion rutas no asignadas
 app.get('*', function (req, res, next) {
-  const error = new Error('Error de sistema');
+  const error = new Error('Error Recurso no Encontrado');
   error.statusCode = 404;
   next(error);
 });
+
+// middleware
+app.use(errorLogger);
 app.use(errorHandler);
 
 module.exports = app;
